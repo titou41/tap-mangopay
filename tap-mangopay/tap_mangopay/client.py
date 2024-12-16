@@ -9,6 +9,7 @@ from singer_sdk.authenticators import BearerTokenAuthenticator
 from singer_sdk.helpers.jsonpath import extract_jsonpath
 from singer_sdk.pagination import BaseAPIPaginator
 from singer_sdk.streams import RESTStream
+from .rate_limiter import RateLimiter
 
 if sys.version_info >= (3, 9):
     import importlib.resources as importlib_resources
@@ -92,6 +93,7 @@ class MangopayEventStream(RESTStream):
         super().__init__(tap)
         self._access_token = None
         self.logger = logging.getLogger(__name__)
+        self.rate_limiter = RateLimiter(self.config) 
 
     @property
     def url_base(self) -> str:
@@ -108,6 +110,23 @@ class MangopayEventStream(RESTStream):
             self,
             token=self._access_token
         )
+
+    def request_records(self, context: Optional[dict]) -> Iterable[dict]:
+        """Request records from REST endpoint(s)."""
+        try:
+            # Utiliser super().request_records au lieu de request_records_wrapper
+            for record in super().request_records(context):
+                self.rate_limiter.wait_if_needed()
+                yield record
+        except Exception as e:
+            self.logger.error(f"Error in request_records: {str(e)}")
+            raise
+
+    def _request(self, prepared_request, context: Optional[dict] = None) -> requests.Response:
+        """Execute a prepared API request and return the response."""
+        # Attendre si nécessaire avant chaque appel API
+        self.rate_limiter.wait_if_needed()
+        return super()._request(prepared_request, context)
 
     def get_access_token(self) -> str:
         """Get OAuth2 access token."""

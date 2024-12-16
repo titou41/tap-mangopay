@@ -63,6 +63,20 @@ class TapMangopay(Tap):
             allowed_values=["sandbox", "production"],  # Limite les valeurs possibles
             description="Environment to use (sandbox or production)"
         ),
+        th.Property(
+            "rate_limit_max_calls",
+            th.IntegerType,
+            required=False,
+            default=2300,
+            description="Maximum number of API calls allowed in the time window"
+        ),
+        th.Property(
+            "rate_limit_time_window",
+            th.IntegerType,
+            required=False,
+            default=900,
+            description="Time window in seconds for rate limiting (default: 900 seconds = 15 minutes)"
+        ),
     ).to_dict()
 
     def discover_streams(self) -> List[Stream]:
