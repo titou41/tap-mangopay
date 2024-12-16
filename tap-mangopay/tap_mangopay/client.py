@@ -11,15 +11,6 @@ from singer_sdk.pagination import BaseAPIPaginator
 from singer_sdk.streams import RESTStream
 from .rate_limiter import RateLimiter
 
-if sys.version_info >= (3, 9):
-    import importlib.resources as importlib_resources
-else:
-    import importlib_resources
-
-_Auth = Callable[[requests.PreparedRequest], requests.PreparedRequest]
-SCHEMAS_DIR = importlib_resources.files(__package__) / "schemas"
-
-
 # Configuration du logger
 logging.basicConfig(
     level=logging.INFO,

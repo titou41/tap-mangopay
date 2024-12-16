@@ -57,21 +57,6 @@ class EventsStream(MangopayEventStream):
             params["AfterDate"] = int(state["replication_key_value"])
 
         return params
-
-    def get_next_page_token(self, response: requests.Response, previous_token: Optional[Any]) -> Optional[Any]:
-        """Return token for next page."""
-        try:
-            data = response.json()
-            if not data:
-                return None
-                
-            current_page = previous_token if previous_token else 1
-            if len(data) == 100:
-                return current_page + 1
-            return None
-        except Exception as e:
-            self.logger.error(f"Error in pagination: {str(e)}")
-            return None
     
     def parse_response(self, response: requests.Response) -> Iterable[dict]:
         """Parse the response and return records."""

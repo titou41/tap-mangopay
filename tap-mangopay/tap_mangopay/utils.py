@@ -104,7 +104,6 @@ class BaseUserStream(MangopayEventStream):
         """Process each record after parsing."""
         processed_row = super().post_process(row, context)
         if processed_row:
-            # Ajouter des traitements spécifiques aux comptes bancaires si nécessaire
             if "CreationDate" in processed_row:
                 try:
                     if isinstance(processed_row["CreationDate"], str):
